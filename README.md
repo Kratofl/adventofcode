@@ -1,4 +1,4 @@
 # AdventOfCode
-- 2020: I've written this code in 2020, but I've just started coding in a company
-- 2021: One year progress since I've started working in a company
+- 2020: First year with c#
+- 2021: Second year wth c#
 - 2022: See soon ;)
