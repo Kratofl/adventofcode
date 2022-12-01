@@ -1,23 +1,33 @@
 [string[]]$lines = Get-Content -Path $PSScriptRoot\Input.txt
 
+function Get-ElfCalories {
+    $calories = New-Object int[] 0;
+    [int] $currentElfCalories = 0;
+    foreach ($line in $lines) {
+        # Elf is done
+        if ([string]::IsNullOrEmpty($line)) {
+            if ($currentElfCalories -gt $mostcalories) {
+                $calories += $currentElfCalories
+            }
+            $currentElfCalories = 0;
+            continue;
+        }
+        $currentElfCalories += [int]$line;
+    }
+    return $calories;
+}
+
 function DayOne-PartOne {
     [CmdletBinding()]
     param ()   
     process {
+        [int[]] $calories = Get-ElfCalories
         [int] $mostcalories = 0;
-
-        [int] $currentElvCalories = 0;
-        foreach ($line in $lines) {
-            # Elv is done
-            if ([string]::IsNullOrEmpty($line)) {
-                if ($currentElvCalories -gt $mostcalories) {
-                    $mostcalories = $currentElvCalories
-                }
-                $currentElvCalories = 0;
-                continue;
+        
+        foreach ($calorie in $calories) {
+            if ($calorie -gt $mostcalories) {
+                $mostcalories = $calorie
             }
-
-            $currentElvCalories += [int]$line;
         }
         Write-Host $mostcalories
     }   
@@ -26,19 +36,9 @@ function DayOne-PartTwo {
     [CmdletBinding()]
     param ()
     process {
-        $mostcalories = New-Object int[] 0;
+        [int[]] $calories = Get-ElfCalories
 
-        [int] $currentElvCalories = 0;
-        foreach ($line in $lines) {
-            # Elv is done
-            if ([string]::IsNullOrEmpty($line)) {
-                $mostcalories += $currentElvCalories
-                $currentElvCalories = 0;
-                continue;
-            }
-            $currentElvCalories += [int]$line;
-        }
-        $sortedCalories = $mostcalories | Sort-Object -Descending
+        $sortedCalories = $calories | Sort-Object -Descending
         $selectedCalories = $sortedCalories | Select-Object -First 3 -Wait
         $output = $selectedCalories[0] + $selectedCalories[1] + $selectedCalories[2];
         Write-Host $output;
