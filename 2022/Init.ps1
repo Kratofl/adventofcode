@@ -1,4 +1,5 @@
 . $PSScriptRoot\Day1\Day1.ps1
+. $PSScriptRoot\Day2\Day2.ps1
 
 function aoc {
     [CmdletBinding()]
@@ -16,6 +17,10 @@ function aoc {
             1 { switch ($part) {
                 1 { DayOne-PartOne }
                 2 { DayOne-PartTwo }
+            } }
+            2 { switch ($part) {
+                1 { DayTwo-PartOne }
+                2 { DayTwo-PartTwo }
             } }
         }
     }
