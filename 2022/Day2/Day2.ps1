@@ -1,49 +1,6 @@
 [string[]]$lines = Get-Content -Path $PSScriptRoot\Input.txt
-
-function Get-Score {
-    [CmdletBinding()]
-    param (
-        [Parameter()]
-        [string] $Opponent,
-
-        [Parameter()]
-        [string] $You
-    )
-    process {
-        [int] $roundScore = 0;
-        if ($You -Match "X") {
-            $roundScore += 1;
-
-            if (($Opponent -Match "A")) {
-                $roundScore += 3;
-            }
-            elseif (($Opponent -Match "C")) {
-                $roundScore += 6;
-            }
-        }
-        elseif ($You -Match "Y") {
-            $roundScore += 2;
-
-            if (($Opponent -Match "B")) {
-                $roundScore += 3;
-            }
-            elseif (($Opponent -Match "A")) {
-                $roundScore += 6;
-            }
-        }
-        elseif ($You -Match "Z") {
-            $roundScore += 3;
-
-            if (($Opponent -Match "C")) {
-                $roundScore += 3;
-            }
-            elseif (($Opponent -Match "B")) {
-                $roundScore += 6;
-            }
-        }
-        return $roundScore
-    }
-}
+[int] $winPoints = 6;
+[int] $drawPoints = 3;
 
 function DayTwo-PartOne {
     [CmdletBinding()]
@@ -51,10 +8,10 @@ function DayTwo-PartOne {
     process {
         [int] $totalScore = 0;
         foreach ($line in $lines) {
-            [int] $roundScore = 0;
-            [string[]] $descisions = $line -Split " "
-
-            $totalScore += Get-Score -Opponent $descisions[0] -You $descisions[1]
+            [string[]] $decisions = $line -Split " "
+            [Decision] $yourDecision = Convert-StringToDecision -String $decisions[1]
+            [Decision] $opponentDecision = Convert-StringToDecision -String $decisions[0]
+            $totalScore += Get-Score -Opponent $opponentDecision -You $yourDecision
         }
         Write-Output $totalScore
     }   
@@ -65,48 +22,136 @@ function DayTwo-PartTwo {
     process {
         [int] $totalScore = 0;
         foreach ($line in $lines) {
-            [int] $roundScore = 0;
+            [string[]] $decisions = $line -Split " "
+            [Action] $yourAction = Convert-StringToAcion -String $decisions[1]
+            [Decision] $opponentDecision = Convert-StringToDecision -String $decisions[0]
 
-            if ($line -Match "X") {
-                if (($line -Match "A")) {
-                    $roundScore += 3;
-                }
-                elseif (($line -Match "B")) {
-                    $roundScore += 1;
-                }
-                elseif (($line -Match "C")) {
-                    $roundScore += 2;
-                }
+            [Decision] $yourDecision = [Decision]::Rock
+            if ($yourAction -eq [Action]::Lose) {
+                $yourDecision = Get-LosingDecision -Decision $opponentDecision
             }
-            elseif ($line -Match "Y") {
-                $roundScore += 3;
-
-                if (($line -Match "A")) {
-                    $roundScore += 1;
-                }
-                elseif (($line -Match "B")) {
-                    $roundScore += 2;
-                }
-                elseif (($line -Match "C")) {
-                    $roundScore += 3;
-                }
+            if ($yourAction -eq [Action]::Draw) {
+                $yourDecision = $opponentDecision
             }
-            elseif ($line -Match "Z") {
-                $roundScore += 6;
-
-                if (($line -Match "A")) {
-                    $roundScore += 2;
-                }
-                elseif (($line -Match "B")) {
-                    $roundScore += 3;
-                }
-                elseif (($line -Match "C")) {
-                    $roundScore += 1;
-                }
+            if ($yourAction -eq [Action]::Win) {
+                $yourDecision = Get-WinningDecision -Decision $opponentDecision
             }
-
-            $totalScore += $roundScore;
+            $totalScore += Get-Score -Opponent $opponentDecision -You $yourDecision
         }
         Write-Output $totalScore
     }   
 }
+
+function Get-Score {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [Decision] $Opponent,
+
+        [Parameter(Mandatory = $true)]
+        [Decision] $You
+    )
+    process {
+        [int] $roundScore = 0;
+
+        $roundScore += [int]$You
+
+        if ($You -eq $Opponent) 
+            { $roundScore += $drawPoints }
+
+        if ((($You -eq [Decision]::Rock) -and ($Opponent -eq [Decision]::Scissors)) -or
+            (($You -eq [Decision]::Paper) -and ($Opponent -eq [Decision]::Rock)) -or
+            (($You -eq [Decision]::Scissors) -and ($Opponent -eq [Decision]::Paper))) {
+            $roundScore += $winPoints;
+        }
+
+        return $roundScore
+    }
+}
+function Get-WinningDecision {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [Decision] $Decision
+    )
+    process {
+        if ($Decision -eq [Decision]::Scissors) {
+            return [Decision]::Rock
+        }
+        if ($Decision -eq [Decision]::Paper) {
+            return [Decision]::Scissors
+        }
+        if ($Decision -eq [Decision]::Rock) {
+            return [Decision]::Paper
+        }
+        Write-Error "Wrong input: " + $Decision
+    }
+}
+function Get-LosingDecision {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [Decision] $Decision
+    )
+    process {
+        if ($Decision -eq [Decision]::Rock) {
+            return [Decision]::Scissors
+        }
+        if ($Decision -eq [Decision]::Scissors) {
+            return [Decision]::Paper
+        }
+        if ($Decision -eq [Decision]::Paper) {
+            return [Decision]::Rock
+        }
+        Write-Error "Wrong input: " + $Decision
+    }
+}
+function Convert-StringToDecision {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $String
+    )
+    process {
+        if (($String -Match "X") -or ($String -Match "A")) {
+            return [Decision]::Rock
+        }
+        if (($String -Match "Y") -or ($String -Match "B")) {
+            return [Decision]::Paper
+        }
+        if (($String -Match "Z") -or ($String -Match "C")) {
+            return [Decision]::Scissors
+        }
+        Write-Error "Wrong input: " + $String
+    }
+}
+function Convert-StringToAcion {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $String
+    )
+    process {
+        if (($String -Match "X")) {
+            return [Action]::Lose
+        }
+        if (($String -Match "Y")) {
+            return [Action]::Draw
+        }
+        if (($String -Match "Z")) {
+            return [Action]::Win
+        }
+        Write-Error "Wrong input: " + $String
+    }
+}
+enum Decision {
+    Rock = 1
+    Paper = 2
+    Scissors = 3
+}
+enum Action {
+    Lose = 1
+    Draw = 2
+    Win = 3
+}
+
+DayTwo-PartTwo
