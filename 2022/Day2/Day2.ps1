@@ -14,7 +14,7 @@ function DayTwo-PartOne {
             $totalScore += Get-Score -Opponent $opponentDecision -You $yourDecision
         }
         Write-Output $totalScore
-    }   
+    }
 }
 function DayTwo-PartTwo {
     [CmdletBinding()]
@@ -154,4 +154,4 @@ enum Action {
     Win = 3
 }
 
-DayTwo-PartTwo
+DayTwo-PartOne
