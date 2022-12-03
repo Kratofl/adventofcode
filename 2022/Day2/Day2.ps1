@@ -153,5 +153,3 @@ enum Action {
     Draw = 2
     Win = 3
 }
-
-DayTwo-PartOne

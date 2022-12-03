@@ -58,5 +58,3 @@ function Get-LetterValue([string] $Letter) {
     $output = $letters.IndexOf($Letter) + 1
     return $output
 }
-
-DayThree-PartOne
