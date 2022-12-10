@@ -88,10 +88,7 @@ function DayNine-PartOne {
             }
         }
         [system.collections.generic.list[string]] $counts = $tailPositions | Select-Object -Unique
-        foreach ($count in $counts) {
-            #Write-Output $count
-        }
-        #Write-Output $counts.Count
+        Write-Output $counts.Count
     }
 }
 
